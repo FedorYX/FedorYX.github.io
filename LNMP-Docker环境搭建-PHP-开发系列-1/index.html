@@ -1,0 +1,776 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Linux,Nginx,Mysql,PHP,Docker">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Fedor 的小花园与大世界" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="互联网是一门实践科学，想要学习 PHP 第一要务即搭建 PHP 开发环境，有了开发环境则可边学习边实践，效果比只看视频和教程好很多。博主也是个 PHP 初学者，搭建环境也并不是一番风顺。本文记录了通过 Docker 搭建 LNMP  Web 开发环境过程，以帮助初学者快速搭建一个简单易上手的开发环境。">
+<meta name="keywords" content="Linux,Nginx,Mysql,PHP,Docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LNMP Docker环境搭建 -- PHP 开发系列(1)">
+<meta property="og:url" content="https://fedoryx.github.io/LNMP-Docker环境搭建-PHP-开发系列-1/index.html">
+<meta property="og:site_name" content="Fedor 的小花园与大世界">
+<meta property="og:description" content="互联网是一门实践科学，想要学习 PHP 第一要务即搭建 PHP 开发环境，有了开发环境则可边学习边实践，效果比只看视频和教程好很多。博主也是个 PHP 初学者，搭建环境也并不是一番风顺。本文记录了通过 Docker 搭建 LNMP  Web 开发环境过程，以帮助初学者快速搭建一个简单易上手的开发环境。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/micooz/docker-lnmp/raw/master/architecture.png">
+<meta property="og:updated_time" content="2017-08-31T14:57:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LNMP Docker环境搭建 -- PHP 开发系列(1)">
+<meta name="twitter:description" content="互联网是一门实践科学，想要学习 PHP 第一要务即搭建 PHP 开发环境，有了开发环境则可边学习边实践，效果比只看视频和教程好很多。博主也是个 PHP 初学者，搭建环境也并不是一番风顺。本文记录了通过 Docker 搭建 LNMP  Web 开发环境过程，以帮助初学者快速搭建一个简单易上手的开发环境。">
+<meta name="twitter:image" content="https://github.com/micooz/docker-lnmp/raw/master/architecture.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://fedoryx.github.io/LNMP-Docker环境搭建-PHP-开发系列-1/">
+
+
+
+
+
+  <title>LNMP Docker环境搭建 -- PHP 开发系列(1) | Fedor 的小花园与大世界</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Fedor 的小花园与大世界</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://fedoryx.github.io/LNMP-Docker环境搭建-PHP-开发系列-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fedor">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fedor 的小花园与大世界">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">LNMP Docker环境搭建 -- PHP 开发系列(1)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-28T17:02:55+00:00">
+                2017-08-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web/" itemprop="url" rel="index">
+                    <span itemprop="name">web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>互联网是一门实践科学，想要学习 PHP 第一要务即搭建 PHP 开发环境，有了开发环境则可边学习边实践，效果比只看视频和教程好很多。博主也是个 PHP 初学者，搭建环境也并不是一番风顺。本文记录了通过 Docker 搭建 LNMP  Web 开发环境过程，以帮助初学者快速搭建一个简单易上手的开发环境。</p>
+<a id="more"></a>
+<h1 id="0-前言"><a href="#0-前言" class="headerlink" title="0 前言"></a>0 前言</h1><p>LNMP 是指一组通常一起使用来运行动态网站或者服务器的自由软件名称首字母缩写：</p>
+<ul>
+<li>Linux</li>
+<li>Nginx</li>
+<li>MySQL</li>
+<li>PHP</li>
+</ul>
+<p>搭建环境前需要安装 Docker 相关软件：</p>
+<ol>
+<li>Docker for MAC</li>
+<li>Kitematic</li>
+</ol>
+<p>若不了解 Docker 相关知识，可参考博主前文<a href="https://fedoryx.github.io/%E5%88%A9%E7%94%A8-GitHub-Hexo-Docker-%E5%BF%AB%E9%80%9F%E6%9E%84%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2-MAC%E7%AF%87/">《利用 GitHub + Hexo + Docker 快速构建独立博客 – MAC篇》</a>。</p>
+<h1 id="LNMP-Docker-环境搭建"><a href="#LNMP-Docker-环境搭建" class="headerlink" title="LNMP Docker 环境搭建"></a>LNMP Docker 环境搭建</h1><p>LNMP Docke 配置采用 Github 上的开源项目 <a href="https://github.com/micooz/docker-lnmp" target="_blank" rel="noopener">micooz/docker-lnmp</a>。</p>
+<p>LNMP Docker 环境整体结构如下图所示：</p>
+<p><img src="https://github.com/micooz/docker-lnmp/raw/master/architecture.png" alt="image"></p>
+<p>Docker 环境中共有3个 Container，分别安装 Nginx、PHP-FPM、MySQL，通过 docker-compose.yml 文件配置3个 Container 间的连接关系。同时 docker-compose.yml 也配置了 Contain 中映射到宿主机的相关文件路径，即图中所示 Mount 部分。</p>
+<p>下面介绍具体的环境搭建过程：</p>
+<p>1.download 或 clone github 工程至本地。 </p>
+<p>2.cmd 控制台切换到 github 工程运行指令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker-compose up</span><br></pre></td></tr></table></figure>
+<p>3.docker 会自动下载相关 image 并开启服务，一切正常的话通过 Kitematic 可看到 PHP-FPM 和 MySQL Container 服务已经开启，Nginx 服务报错关闭，错误提示与 server.key 及 server.crt 相关。这里遇到的错误是因为 Nginx 启用 443 端口，443端口是默认的 Https 链接端口。由于开启 Https 服务需要本地配置相关证书，此时本地并无相关证书而报错。这里我们忽略 https 相关配置，进入 nginx/conf.d/ 路径，编辑 default.conf 文件，注释以下几行代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#    listen  443 ssl;</span><br><span class="line">#    ssl_certificate      /etc/nginx/server.crt;</span><br><span class="line">#    ssl_certificate_key  /etc/nginx/server.key;</span><br><span class="line">#    ssl_protocols        TLSv1 TLSv1.1 TLSv1.2;</span><br><span class="line">#    ssl_ciphers          HIGH:!aNULL:!MD5;</span><br><span class="line">#    ssl_prefer_server_ciphers  on;</span><br></pre></td></tr></table></figure>
+<p>4.再次执行第2步指令，可见3个 Container 正常开启。</p>
+<p>5.接下来我们会给 PHP-FPM 安装 mysqli 插件，PHP-FPM 通过 mysqli 与 MySQL 进行通信。默认的配置是不包含 mysqli 插件的，编辑 php-fpm/ 路径下的 Dockerfile 文件，增加一行代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">######</span><br><span class="line"># You can install php extensions using docker-php-ext-install</span><br><span class="line">RUN docker-php-ext-install mysqli</span><br><span class="line">######</span><br></pre></td></tr></table></figure></p>
+<p>修改 Dockerfile 文件后需重新 build，执行以下指令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker-compose build</span><br></pre></td></tr></table></figure>
+<p>然后开启服务：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker-compose up</span><br></pre></td></tr></table></figure>
+<p>或</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker-compose up -d</span><br></pre></td></tr></table></figure>
+<p>6.最终3个服务同时开启，浏览器中输入:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">localhost</span><br></pre></td></tr></table></figure>
+<p>可打开服务器首页，显示 php 相关信息。</p>
+<p>7.关闭服务可输入：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker-compose down</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/php/" rel="tag"># php</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/iOS-数据库探究/" rel="next" title="iOS 数据库探究">
+                <i class="fa fa-chevron-left"></i> iOS 数据库探究
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Fedor">
+          <p class="site-author-name" itemprop="name">Fedor</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0-前言"><span class="nav-number">1.</span> <span class="nav-text">0 前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LNMP-Docker-环境搭建"><span class="nav-number">2.</span> <span class="nav-text">LNMP Docker 环境搭建</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fedor</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

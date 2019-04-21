@@ -1,0 +1,901 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Blog,GitHub,Hexo,Docker,Next,博客，GitHub Pages">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Fedor 的小花园与大世界" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="本文记录了 MAC 环境下搭建独立博客的完整过程，最初的方案是 Github + Hexo，之后引入 Docker。此博客搭建方案的特点是快速、独立、免费、高自由度。本博客网站即是由此方案搭建而成，博客主题为 Next。">
+<meta name="keywords" content="Blog,GitHub,Hexo,Docker,Next,博客，GitHub Pages">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 GitHub + Hexo + Docker 快速构建独立博客 -- MAC篇">
+<meta property="og:url" content="https://fedoryx.github.io/利用-GitHub-Hexo-Docker-快速构建独立博客-MAC篇/index.html">
+<meta property="og:site_name" content="Fedor 的小花园与大世界">
+<meta property="og:description" content="本文记录了 MAC 环境下搭建独立博客的完整过程，最初的方案是 Github + Hexo，之后引入 Docker。此博客搭建方案的特点是快速、独立、免费、高自由度。本博客网站即是由此方案搭建而成，博客主题为 Next。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://fedoryx.github.io/利用-GitHub-Hexo-Docker-快速构建独立博客-MAC篇/Docker_blog_structure.png">
+<meta property="og:updated_time" content="2017-06-11T08:28:51.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="利用 GitHub + Hexo + Docker 快速构建独立博客 -- MAC篇">
+<meta name="twitter:description" content="本文记录了 MAC 环境下搭建独立博客的完整过程，最初的方案是 Github + Hexo，之后引入 Docker。此博客搭建方案的特点是快速、独立、免费、高自由度。本博客网站即是由此方案搭建而成，博客主题为 Next。">
+<meta name="twitter:image" content="https://fedoryx.github.io/利用-GitHub-Hexo-Docker-快速构建独立博客-MAC篇/Docker_blog_structure.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://fedoryx.github.io/利用-GitHub-Hexo-Docker-快速构建独立博客-MAC篇/">
+
+
+
+
+
+  <title>利用 GitHub + Hexo + Docker 快速构建独立博客 -- MAC篇 | Fedor 的小花园与大世界</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Fedor 的小花园与大世界</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://fedoryx.github.io/利用-GitHub-Hexo-Docker-快速构建独立博客-MAC篇/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fedor">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fedor 的小花园与大世界">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">利用 GitHub + Hexo + Docker 快速构建独立博客 -- MAC篇</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-04T01:50:33+00:00">
+                2017-06-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/博客/" itemprop="url" rel="index">
+                    <span itemprop="name">博客</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文记录了 MAC 环境下搭建独立博客的完整过程，最初的方案是 Github + Hexo，之后引入 Docker。此博客搭建方案的特点是快速、独立、免费、高自由度。本博客网站即是由此方案搭建而成，博客主题为 Next。</p>
+<a id="more"></a>
+<h1 id="0-前言"><a href="#0-前言" class="headerlink" title="0 前言"></a>0 前言</h1><h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><p>1.GitHub  &amp; Git</p>
+<h2 id="系统结构"><a href="#系统结构" class="headerlink" title="系统结构"></a>系统结构</h2><p>首先给出 Blog 系统的整体结构。结构图如下所示：</p>
+<img src="/利用-GitHub-Hexo-Docker-快速构建独立博客-MAC篇/Docker_blog_structure.png" title="结构图">
+<p>图中结构大致分为3部分：</p>
+<p>1.宿主机<br>宿主机即 MAC，主要完成资源配置文件挂载及环境配置。挂载文件如下：</p>
+<ul>
+<li>_config.yml</li>
+<li>themes</li>
+<li>source</li>
+<li>.ssh</li>
+</ul>
+<p>2.Docker<br>Docker 是 Blog 系统的核心，使用配置好的 Hexo-Docker Image 创建两个 Container，Hexo-server 负责预览，Hexo-deploy 执行部署。</p>
+<p>3.GitHub Pages  &amp;&amp; 本地预览<br>GitHub Pages 实现网络博客展示，本地打开 Local：4000 地址实现预览。</p>
+<p>这里建立 Blog 系统的初步印象，下文将详细描述博客的完整搭建过程。</p>
+<p>博主本着授人以鱼不如授人以渔的观念，文中很多地方给出了参考链接，若文章中描述不清楚请移步至参考文档，会有更深的理解。</p>
+<h1 id="一-GitHub-Pages"><a href="#一-GitHub-Pages" class="headerlink" title="一. GitHub Pages"></a>一. GitHub Pages</h1><p>想拥有自己的博客会是什么心路历程呢？</p>
+<blockquote>
+<p>喜欢写 Blog 的人，会经历三个阶段。</p>
+<p>第一阶段，刚接触 Blog，觉得很新鲜，试着选择一个免费空间来写。</p>
+<p>第二阶段，发现免费空间限制太多，就自己购买域名和空间，搭建独立博客。</p>
+<p>第三阶段，觉得独立博客的管理太麻烦，最好在保留控制权的前提下，让别人来管，自己只负责写文章。</p>
+<p>《 <a href="http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html" target="_blank" rel="noopener">引自 阮一峰</a> 》</p>
+</blockquote>
+<p>帮助你达到第三阶段的利器就是 <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a>。</p>
+<h2 id="GitHub-Pages-是什么："><a href="#GitHub-Pages-是什么：" class="headerlink" title="GitHub Pages 是什么："></a>GitHub Pages 是什么：</h2><p>GitHub Pages 可以被认为是用户编写的、托管在 GitHub 上的<strong>静态网页</strong>。</p>
+<h2 id="GitHub-Pages-的优势："><a href="#GitHub-Pages-的优势：" class="headerlink" title="GitHub Pages 的优势："></a>GitHub Pages 的优势：</h2><ul>
+<li>免费</li>
+<li>无限流量</li>
+<li>全世界理想的访问速度</li>
+</ul>
+<h2 id="GitHub-Pages-注意点："><a href="#GitHub-Pages-注意点：" class="headerlink" title="GitHub Pages 注意点："></a>GitHub Pages 注意点：</h2><ol>
+<li>GitHub Pages 仓库名命名格式一定为 用户名.github.io，用户名是你的 GitHub 账户用户名。</li>
+<li>博客内容一定是在 Master 分支下。</li>
+<li>博客搭建好后可以通过 http://用户名.github.io 地址来访问博客主页。</li>
+</ol>
+<p>详细的内容参考 <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages官方主页</a>。</p>
+<h1 id="二-Hexo"><a href="#二-Hexo" class="headerlink" title="二. Hexo"></a>二. Hexo</h1><h2 id="Hexo简介"><a href="#Hexo简介" class="headerlink" title="Hexo简介"></a>Hexo简介</h2><ul>
+<li><a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">官方</a> 定义：快速、简洁且高效的博客框架</li>
+<li>另一种说法：Hexo 是一个轻量的静态博客框架。 </li>
+<li>博主扯淡：Hexo 是一个工具，借助它我们可以配置博客的主题、样式，可以通过插件增强博客的功能，可以编写及管理文章，可以预览博客以及部署博客至 GitHub Pages。</li>
+</ul>
+<p>到此结束。</p>
+<p>哈哈，看到这里是不是想打作者了，其实是作者对 Hexo 也不是完全精通，但这并不妨碍搭建自己的博客。很多文章介绍了如何一步步搭建 Hexo 的开发环境，咱们由于使用了 Docker 这个神兵利器，一些基础环境的搭建真的是轻松太多了，因此这部分挑重点讲讲 Hexo，具体的环境搭建等 Docker 部分再详细介绍。这部分也可以先忽略，后文中遇到 Hexo 的部分不懂的再来看。</p>
+<h2 id="Hexo-搭建准备"><a href="#Hexo-搭建准备" class="headerlink" title="Hexo 搭建准备"></a>Hexo 搭建准备</h2><ul>
+<li><p>Node.js</p>
+</li>
+<li><p>Git</p>
+</li>
+</ul>
+<p>当然，有了 Docker，就不需要自己建立 Node.js 环境，Git 环境开发者必备。</p>
+<h2 id="Hexo-配置方法"><a href="#Hexo-配置方法" class="headerlink" title="Hexo 配置方法"></a>Hexo 配置方法</h2><p>当 Hexo 初始化一个项目成功后，我们会在目录下看到一些文件夹，这里介绍几个重要的配置文件。</p>
+<ul>
+<li>_config.yml 全局配置文件</li>
+<li>themes 存放主题的文件夹</li>
+<li>source 博客资源文件夹</li>
+</ul>
+<h2 id="Hexo-重要命令"><a href="#Hexo-重要命令" class="headerlink" title="Hexo 重要命令"></a>Hexo 重要命令</h2><h3 id="init"><a href="#init" class="headerlink" title="init"></a>init</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo init [folder]</span><br></pre></td></tr></table></figure>
+<p>新建一个网站。如果没有设置 folder ，Hexo 默认在目前的文件夹建立网站</p>
+<h3 id="new"><a href="#new" class="headerlink" title="new"></a>new</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new [layout] &lt;title&gt;</span><br></pre></td></tr></table></figure>
+<p>新建一篇文章。如果没有设置 layout 的话，默认使用 _config.yml 中的 default_layout 参数代替。如果标题包含空格的话，请使用引号括起来。</p>
+<h3 id="generate"><a href="#generate" class="headerlink" title="generate"></a>generate</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>生成静态文件。</p>
+<p>该命令可以简写为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo g</span><br></pre></td></tr></table></figure>
+<h3 id="server"><a href="#server" class="headerlink" title="server"></a>server</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>启动服务器。默认情况下，访问网址为： <a href="http://localhost:4000/" target="_blank" rel="noopener">http://localhost:4000/</a> 。</p>
+<h3 id="deploy"><a href="#deploy" class="headerlink" title="deploy"></a>deploy</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>部署网站。</p>
+<p>该命令可以简写为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo d</span><br></pre></td></tr></table></figure>
+<p>详细的命令介绍可以参考 <a href="https://hexo.io/zh-cn/docs/commands.html" target="_blank" rel="noopener">官方文档</a>。</p>
+<h2 id="Hexo的部署"><a href="#Hexo的部署" class="headerlink" title="Hexo的部署"></a>Hexo的部署</h2><p>Hexo 可以部署到很多平台，这里重点剖析下 Hexo 部署到 GitHub Pages 的原理。</p>
+<p>之前在 GitHub上 创建的 repo（用户名.github.io）一个最大的特点就是其 Master 分支中的 html 静态文件，可以通过链接 http://用户名.github.io 来直接访问。</p>
+<p>Hexo -g 会生成一个静态网站（第一次会生成一个 public 目录），这个静态文件可以直接访问。</p>
+<p>需要将 Hexo 生成的静态网站，提交( git commit )到 GitHub 上，即完成部署。</p>
+<h2 id="本章重要参考："><a href="#本章重要参考：" class="headerlink" title="本章重要参考："></a>本章重要参考：</h2><p>1.<a href="https://linghucong.js.org/2016/04/15/2016-04-15-hexo-github-pages-blog/" target="_blank" rel="noopener">手把手教你使用 Hexo + Github Pages 搭建个人独立博客</a></p>
+<p>2.<a href="http://jeasonstudio.github.io/2016/05/26/Mac%E4%B8%8A%E6%90%AD%E5%BB%BA%E5%9F%BA%E4%BA%8EGitHub-Page%E7%9A%84Hexo%E5%8D%9A%E5%AE%A2/" target="_blank" rel="noopener">Mac 上搭建基于 GitHub Page 的 Hexo 博客</a></p>
+<p>3.<a href="http://henrydong.com/2016/01/17/%E5%9F%BA%E4%BA%8ENode-js%E7%9A%84Github-Pages%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/" target="_blank" rel="noopener">基于 Node.js 的 Github Pages 博客系统</a></p>
+<h1 id="三-Docker"><a href="#三-Docker" class="headerlink" title="三. Docker"></a>三. Docker</h1><h2 id="Docker-简介"><a href="#Docker-简介" class="headerlink" title="Docker 简介"></a>Docker 简介</h2><p>什么是 <a href="https://www.docker.com/" target="_blank" rel="noopener">Docker</a>？</p>
+<p>官方说法：</p>
+<blockquote>
+<p>Docker is the world’s leading software container platform. Developers use Docker to eliminate “works on my machine” problems when collaborating on code with co-workers. Operators use Docker to run and manage apps side-by-side in isolated containers to get better compute density. Enterprises use Docker to build agile software delivery pipelines to ship new features faster, more securely and with confidence for both Linux and Windows Server apps.</p>
+</blockquote>
+<p>博主 BiBi: </p>
+<blockquote>
+<p>Docker 是一种虚拟化技术，利用 Docker 可以创建或使用容器。<br>容器是什么呢？<br>容器可以想象成一个黑盒子，盒子中放着基于 Linux 的各种系统、平台、环境、工具等等，一次生成，随地使用，也就是通过虚拟化技术跨平台使用容器，同时同一个容器在 Mac OSX、Linux、Windows 等不同平台的表象一致。<br>另外，容器可以挂载文件或目录到宿主机（容器在虚拟环境运行，宿主机即用户环境），用户环境操作这些挂载的文件等同于虚拟环境操作，反之亦然。当然，也可以通过容器中的控制台来在虚拟环境操作。</p>
+</blockquote>
+<p>Docker 中最基本的概念是 Image（镜像）和 Container（容器）。镜像和容器的关系，就像是面向对象程序设计中的类和实例一样，镜像是静态的定义，容器是镜像运行时的实体。容器可以被创建、启动、停止、删除、暂停等。同一个 Images 可生成多个不同配置的 Container。</p>
+<p>详细资料请参考 <a href="https://www.docker.com/" target="_blank" rel="noopener">Docker官网</a>、<a href="https://yeasy.gitbooks.io/docker_practice/content/introduction/why.html" target="_blank" rel="noopener">《Docker-从入门到实践》</a>。</p>
+<h2 id="Docker-安装"><a href="#Docker-安装" class="headerlink" title="Docker 安装"></a>Docker 安装</h2><h3 id="Docker-For-Mac-下载："><a href="#Docker-For-Mac-下载：" class="headerlink" title="Docker For Mac 下载："></a>Docker For Mac 下载：</h3><p><a href="https://www.docker.com/community-edition" target="_blank" rel="noopener">官网</a> 下载 Docker For Mac CE 版本，企业版是付费的。</p>
+<p>Docker For Mac CE 是 Docker 最新的安装程序，性能好，很多博客中提到的其他安装方法可以忽略。</p>
+<h3 id="Kitematic-下载"><a href="#Kitematic-下载" class="headerlink" title="Kitematic 下载"></a>Kitematic 下载</h3><p>Kitematic 是 Docker可视化程序，不用从 Google 搜，安装好 Docker 后 Docker 图标的下拉菜单中可以找到下载方式，相信你一定能找到的。</p>
+<h2 id="Docker-Hexo-Image"><a href="#Docker-Hexo-Image" class="headerlink" title="Docker-Hexo Image"></a>Docker-Hexo Image</h2><p>两种方式：</p>
+<p>1.安装完毕Docker后我们可拉取公开的 Image，博主用的 Docker-Hexo 镜像，执行以下指令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull iyannik0215/docker-hexo</span><br></pre></td></tr></table></figure>
+<p>2.下载 <a href="https://github.com/yakumioto/docker-hexo" target="_blank" rel="noopener">Docker-Hexo github</a> 中./3.2/alpine/ 下的 DockerFile 文件和脚本自行构建 Docker Image。</p>
+<p>新建目录 /Hexo，将下载的 DockerFile 和脚本移动至该文件夹下。命令台切换至 /Hexo 路径下，运行以下指令生成 Docker Image。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t xxx/hexo .</span><br></pre></td></tr></table></figure>
+<p>xxx/hexo 是你定义的Image名称，还有千万别忘了后面的 <strong>.</strong> !!!</p>
+<p>博主试了获取镜像的第一种方法，在之后的过程中会报错，因此用的第二种方式。大家可以都试试看。</p>
+<h2 id="Docker-Hexo-Container"><a href="#Docker-Hexo-Container" class="headerlink" title="Docker-Hexo Container"></a>Docker-Hexo Container</h2><h3 id="指令生成hexo-server-Container："><a href="#指令生成hexo-server-Container：" class="headerlink" title="指令生成hexo-server Container："></a>指令生成hexo-server Container：</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -p 4000:80 --name hexo-server -d \</span><br><span class="line">-v &#123;你的博客文件夹路径&#125;/.ssh:/root/.ssh \</span><br><span class="line">-v &#123;你的博客文件夹路径&#125;/source:/Hexo/source \</span><br><span class="line">-v &#123;你的博客文件夹路径&#125;/themes:/Hexo/themes \</span><br><span class="line">-v &#123;你的博客文件夹路径&#125;/_config.yml:/Hexo/_config.yml \</span><br><span class="line">xxx/hexo &#123;你的 github username&#125; &#123;你的 github email&#125; s</span><br></pre></td></tr></table></figure>
+<p>注意：</p>
+<ul>
+<li>{你的博客文件夹路径} 即你新建的目录 /Hexo </li>
+<li>命令中的 xxx/hexo 即上一步的Image名称</li>
+<li>命令中的-v即挂载文件指令</li>
+<li>博主将系统的.ssh文件拷贝至该目录，这样避免容器意外修改系统.ssh文件</li>
+</ul>
+<p>Kitematic 中可看到 hexo-server container 正在执行，点击 exec 可进入 container 控制台。</p>
+<h3 id="指令生成-hexo-deploy-Container："><a href="#指令生成-hexo-deploy-Container：" class="headerlink" title="指令生成 hexo-deploy Container："></a>指令生成 hexo-deploy Container：</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -p 4000:80 --name hexo-deploy -d \</span><br><span class="line">*v &#123;你的博客文件夹路径&#125;/.ssh:/root/.ssh \</span><br><span class="line">*v &#123;你的博客文件夹路径&#125;/source:/Hexo/source \</span><br><span class="line">*v &#123;你的博客文件夹路径&#125;/themes:/Hexo/themes \</span><br><span class="line">*v &#123;你的博客文件夹路径&#125;/_config.yml:/Hexo/_config.yml \</span><br><span class="line">xxx/hexo &#123;你的 github username&#125; &#123;你的 github email&#125; d</span><br></pre></td></tr></table></figure>
+<p>Kitematic 中找到 hexo-deploy container，其状态应该是执行完毕。这里注意下 Docker 中的容器运行其实是执行一个程序，这里 hexo-deploy 运行完毕后即立即退出，观察效果可看自己的 GitHub pages 是否更新。</p>
+<p>Docker 报错可看 log 中的内容，大部分问题应该是宿主机的配置问题。</p>
+<h2 id="本章重要参考：-1"><a href="#本章重要参考：-1" class="headerlink" title="本章重要参考："></a>本章重要参考：</h2><p>1.<a href="https://wangqun.info/2016/11/29/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Docker%E8%BF%90%E8%A1%8CHexo/" target="_blank" rel="noopener">如何使用Docker运行Hexo</a></p>
+<p>2.<a href="https://yeasy.gitbooks.io/docker_practice/content/introduction/why.html" target="_blank" rel="noopener">Docker-从入门到实践</a></p>
+<h1 id="四-踩坑"><a href="#四-踩坑" class="headerlink" title="四.踩坑"></a>四.踩坑</h1><p>一路顺风的搭建完？不知道看完此博客的同学们有没有这么幸运，反正我是磕磕绊绊。因此记录下我遇到的坑，以备不时之需。</p>
+<h2 id="1-git-部署配置问题"><a href="#1-git-部署配置问题" class="headerlink" title="1.git 部署配置问题"></a>1.git 部署配置问题</h2><p>/Hexo 下 _config.yml 中 git 部署的设置一定要与以下配置雷同，空格啥的都不能差！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># Deployment</span><br><span class="line">## Docs: https://hexo.io/docs/deployment.html</span><br><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: XXXXXXXXXXX（git repo 的地址）</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+<h2 id="2-Mac-中多个-ssh-账号配置问题"><a href="#2-Mac-中多个-ssh-账号配置问题" class="headerlink" title="2.Mac 中多个 ssh 账号配置问题"></a>2.Mac 中多个 ssh 账号配置问题</h2><p>由于博主同一台电脑拥有 GitHub、Gitlab 等多个账号，同时 GitHub Pages repo 设置一个ssh类型的独立 deploy key 会更安全。因此需要修改电脑的 ssh 配置，支持多账号 ssh。</p>
+<p>生成ssh key的具体流程不细讲，参考 <a href="https://help.github.com/articles/connecting-to-github-with-ssh/" target="_blank" rel="noopener">GitHub ssh介绍</a> 即可。</p>
+<h3 id="坑一："><a href="#坑一：" class="headerlink" title="坑一："></a>坑一：</h3><p>这里重点介绍 ~/.ssh/config 文件，其是配置多账号的关键。</p>
+<p>若无 config 文件可输入以下指令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ touch config</span><br></pre></td></tr></table></figure>
+<p>创建本地 config 文件，编辑如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Host Test1.github.com</span><br><span class="line">	HostName github.com</span><br><span class="line">	User git</span><br><span class="line">	IdentityFile ~/.ssh/id_rsa_TestSSH_github</span><br><span class="line">Host Test2.gitlab.com</span><br><span class="line">	HostName gitlab.com</span><br><span class="line">	User git</span><br><span class="line">	IdentityFile ~/.ssh/id_rsa_YourProjectName_gitlab</span><br></pre></td></tr></table></figure>
+<p>解释此配置文件：</p>
+<p>Host： </p>
+<blockquote>
+<p>「 Test1.github.com 」及「 Test2.gitlab.com 」都是「别名」，可以随意命名。但之后使用到该 ssh 配置的项目其 repo 的 host 需改为与别名一致！！！上文中 _config.yml 文件配置部署 git 账号时的 repo 地址的 Host 必须与这里配置一致。</p>
+</blockquote>
+<p>HostName：</p>
+<blockquote>
+<p>该 ssh 配置的实际 host 名称，GitHub 上都为 github.com；</p>
+</blockquote>
+<p>User:</p>
+<blockquote>
+<p>用户名，设置成 git 即可，不用变</p>
+</blockquote>
+<p>IdentityFile：</p>
+<blockquote>
+<p>所使用的公钥文件;</p>
+</blockquote>
+<p>配置完毕，用下面的命令测试一下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh -vT git@Test1.github.com</span><br><span class="line">ssh -vT git@Test2.github.com</span><br></pre></td></tr></table></figure>
+<h3 id="坑二："><a href="#坑二：" class="headerlink" title="坑二："></a>坑二：</h3><p>第一次修改 ssh 配置死活不成功，提示 GitHub 默认 22 端口有问题，Google 搜索让切换 443 端口，切换 443 端口后果然可以 ping 通 GitHub，但命令行执行 ssh 测试依然失败。最后回家一切正常，原来是公司的网络路由造成的影响😓。所以在公司如果配置失败的话可以回家再试试。</p>
+<h2 id="本章重要参考：-2"><a href="#本章重要参考：-2" class="headerlink" title="本章重要参考："></a>本章重要参考：</h2><p>1.<a href="http://shinancao.github.io/2016/12/18/Programming-Git-1/" target="_blank" rel="noopener">《同一个Mac，配置多个SSH Key》</a></p>
+<h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><p>1.<a href="http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html" target="_blank" rel="noopener">《搭建一个免费的，无限流量的Blog—-github Pages和Jekyll入门》</a></p>
+<p>2.<a href="https://pages.github.com/" target="_blank" rel="noopener">《Github Pages主页》</a></p>
+<p>3.<a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">《Hexo主页》</a></p>
+<p>4.<a href="https://linghucong.js.org/2016/04/15/2016-04-15-hexo-github-pages-blog/" target="_blank" rel="noopener">《手把手教你使用Hexo + Github Pages搭建个人独立博客》</a></p>
+<p>5.<a href="http://jeasonstudio.github.io/2016/05/26/Mac%E4%B8%8A%E6%90%AD%E5%BB%BA%E5%9F%BA%E4%BA%8EGitHub-Page%E7%9A%84Hexo%E5%8D%9A%E5%AE%A2/" target="_blank" rel="noopener">《Mac上搭建基于GitHub Page的Hexo博客》</a></p>
+<p>6.<a href="http://henrydong.com/2016/01/17/%E5%9F%BA%E4%BA%8ENode-js%E7%9A%84Github-Pages%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/" target="_blank" rel="noopener">《基于Node.js的Github Pages博客系统》</a></p>
+<p>7.<a href="https://www.docker.com/" target="_blank" rel="noopener">《Docker官网》</a></p>
+<p>8.<a href="https://wangqun.info/2016/11/29/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Docker%E8%BF%90%E8%A1%8CHexo/" target="_blank" rel="noopener">《如何使用Docker运行Hexo》</a></p>
+<p>9.<a href="https://yeasy.gitbooks.io/docker_practice/content/introduction/why.html" target="_blank" rel="noopener">《Docker-从入门到实践》</a></p>
+<p>10.<a href="https://help.github.com/articles/connecting-to-github-with-ssh/" target="_blank" rel="noopener">github ssh介绍</a></p>
+<p>11.<a href="http://shinancao.github.io/2016/12/18/Programming-Git-1/" target="_blank" rel="noopener">《同一个Mac，配置多个SSH Key》</a></p>
+<p>12.<a href="http://yangfch3.com/2016/05/08/hexo-experiences/" target="_blank" rel="noopener">使用 Hexo 与 NexT 搭建博客的避坑总结</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/博客/" rel="tag"># 博客</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/Hexo-博客搜索-SEO-优化-谷歌篇/" rel="prev" title="Hexo 博客搜索 SEO 优化 -- 谷歌篇">
+                Hexo 博客搜索 SEO 优化 -- 谷歌篇 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Fedor">
+          <p class="site-author-name" itemprop="name">Fedor</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0-前言"><span class="nav-number">1.</span> <span class="nav-text">0 前言</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#预备知识"><span class="nav-number">1.1.</span> <span class="nav-text">预备知识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统结构"><span class="nav-number">1.2.</span> <span class="nav-text">系统结构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一-GitHub-Pages"><span class="nav-number">2.</span> <span class="nav-text">一. GitHub Pages</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub-Pages-是什么："><span class="nav-number">2.1.</span> <span class="nav-text">GitHub Pages 是什么：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub-Pages-的优势："><span class="nav-number">2.2.</span> <span class="nav-text">GitHub Pages 的优势：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub-Pages-注意点："><span class="nav-number">2.3.</span> <span class="nav-text">GitHub Pages 注意点：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二-Hexo"><span class="nav-number">3.</span> <span class="nav-text">二. Hexo</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo简介"><span class="nav-number">3.1.</span> <span class="nav-text">Hexo简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo-搭建准备"><span class="nav-number">3.2.</span> <span class="nav-text">Hexo 搭建准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo-配置方法"><span class="nav-number">3.3.</span> <span class="nav-text">Hexo 配置方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo-重要命令"><span class="nav-number">3.4.</span> <span class="nav-text">Hexo 重要命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#init"><span class="nav-number">3.4.1.</span> <span class="nav-text">init</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#new"><span class="nav-number">3.4.2.</span> <span class="nav-text">new</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#generate"><span class="nav-number">3.4.3.</span> <span class="nav-text">generate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#server"><span class="nav-number">3.4.4.</span> <span class="nav-text">server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#deploy"><span class="nav-number">3.4.5.</span> <span class="nav-text">deploy</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo的部署"><span class="nav-number">3.5.</span> <span class="nav-text">Hexo的部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本章重要参考："><span class="nav-number">3.6.</span> <span class="nav-text">本章重要参考：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三-Docker"><span class="nav-number">4.</span> <span class="nav-text">三. Docker</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-简介"><span class="nav-number">4.1.</span> <span class="nav-text">Docker 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-安装"><span class="nav-number">4.2.</span> <span class="nav-text">Docker 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker-For-Mac-下载："><span class="nav-number">4.2.1.</span> <span class="nav-text">Docker For Mac 下载：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kitematic-下载"><span class="nav-number">4.2.2.</span> <span class="nav-text">Kitematic 下载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-Hexo-Image"><span class="nav-number">4.3.</span> <span class="nav-text">Docker-Hexo Image</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-Hexo-Container"><span class="nav-number">4.4.</span> <span class="nav-text">Docker-Hexo Container</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#指令生成hexo-server-Container："><span class="nav-number">4.4.1.</span> <span class="nav-text">指令生成hexo-server Container：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指令生成-hexo-deploy-Container："><span class="nav-number">4.4.2.</span> <span class="nav-text">指令生成 hexo-deploy Container：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本章重要参考：-1"><span class="nav-number">4.5.</span> <span class="nav-text">本章重要参考：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四-踩坑"><span class="nav-number">5.</span> <span class="nav-text">四.踩坑</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-git-部署配置问题"><span class="nav-number">5.1.</span> <span class="nav-text">1.git 部署配置问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Mac-中多个-ssh-账号配置问题"><span class="nav-number">5.2.</span> <span class="nav-text">2.Mac 中多个 ssh 账号配置问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#坑一："><span class="nav-number">5.2.1.</span> <span class="nav-text">坑一：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#坑二："><span class="nav-number">5.2.2.</span> <span class="nav-text">坑二：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本章重要参考：-2"><span class="nav-number">5.3.</span> <span class="nav-text">本章重要参考：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#引用"><span class="nav-number">6.</span> <span class="nav-text">引用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fedor</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
