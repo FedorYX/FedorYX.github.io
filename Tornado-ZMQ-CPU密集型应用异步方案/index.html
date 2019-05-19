@@ -1,0 +1,772 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Tornado, ZMQ, zeromq, 队列">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Fedor 的小花园与大世界" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="Tornado是一款Python 服务器框架，其采用异步IO 的网络模型，具有较高性能。在Tornado 基础上为了提升Cpu 密集型应用在多核Cpu 服务器上的性能表现，可以采用Tornado 协程（异步非阻塞）+队列（通信、解耦）+多线程/多进程任务（榨干多核Cpu）的方案。">
+<meta name="keywords" content="Tornado, ZMQ, zeromq, 队列">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tornado ZMQ CPU密集型应用异步方案">
+<meta property="og:url" content="https://fedoryx.github.io/Tornado-ZMQ-CPU密集型应用异步方案/index.html">
+<meta property="og:site_name" content="Fedor 的小花园与大世界">
+<meta property="og:description" content="Tornado是一款Python 服务器框架，其采用异步IO 的网络模型，具有较高性能。在Tornado 基础上为了提升Cpu 密集型应用在多核Cpu 服务器上的性能表现，可以采用Tornado 协程（异步非阻塞）+队列（通信、解耦）+多线程/多进程任务（榨干多核Cpu）的方案。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-05-19T13:14:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tornado ZMQ CPU密集型应用异步方案">
+<meta name="twitter:description" content="Tornado是一款Python 服务器框架，其采用异步IO 的网络模型，具有较高性能。在Tornado 基础上为了提升Cpu 密集型应用在多核Cpu 服务器上的性能表现，可以采用Tornado 协程（异步非阻塞）+队列（通信、解耦）+多线程/多进程任务（榨干多核Cpu）的方案。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://fedoryx.github.io/Tornado-ZMQ-CPU密集型应用异步方案/">
+
+
+
+
+
+  <title>Tornado ZMQ CPU密集型应用异步方案 | Fedor 的小花园与大世界</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Fedor 的小花园与大世界</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://fedoryx.github.io/Tornado-ZMQ-CPU密集型应用异步方案/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fedor">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fedor 的小花园与大世界">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Tornado ZMQ CPU密集型应用异步方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-19T02:46:53+00:00">
+                2019-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/服务/" itemprop="url" rel="index">
+                    <span itemprop="name">服务</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Tornado是一款Python 服务器框架，其采用异步IO 的网络模型，具有较高性能。在Tornado 基础上为了提升Cpu 密集型应用在多核Cpu 服务器上的性能表现，可以采用Tornado 协程（异步非阻塞）+队列（通信、解耦）+多线程/多进程任务（榨干多核Cpu）的方案。</p>
+<a id="more"></a>
+<h2 id="一-简易Tornado服务"><a href="#一-简易Tornado服务" class="headerlink" title="一. 简易Tornado服务"></a>一. 简易Tornado服务</h2><p><a href="https://www.tornadoweb.org/en/stable/" target="_blank" rel="noopener">Tornado</a> 的详细内容参考官网，这里结合实际应用介绍Tornado 的核心知识点。</p>
+<p>Tornado 作为http 服务器，其核心模块由上至下为 HTTPServer - Application - RequestHandler 三级。简单搭建一个http 服务demo，demo 中包含一个耗时任务，用来模拟Cpu 密集型任务。代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">import random</span><br><span class="line">import time</span><br><span class="line">import os</span><br><span class="line"></span><br><span class="line">import tornado</span><br><span class="line">from tornado import ioloop</span><br><span class="line">from tornado import web</span><br><span class="line">import tornado.httpserver</span><br><span class="line"></span><br><span class="line">def dot():</span><br><span class="line">    &quot;&quot;&quot;callback for showing that IOLoop is still responsive while we wait&quot;&quot;&quot;</span><br><span class="line">    sys.stdout.write(&apos;.&apos;)</span><br><span class="line">    sys.stdout.flush()</span><br><span class="line"></span><br><span class="line">def slow_responder(num):</span><br><span class="line">    print(num)</span><br><span class="line">    time.sleep(random.randint(1,5))</span><br><span class="line">    </span><br><span class="line">class TestHandler(web.RequestHandler):</span><br><span class="line">    </span><br><span class="line">    def get(self):</span><br><span class="line">        print(&quot;get request&quot;)</span><br><span class="line">        slow_responder(5)</span><br><span class="line">        res =  &quot;get http request&quot;</span><br><span class="line">        print(res)</span><br><span class="line">        self.write(res)</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    application = web.Application([(r&quot;/&quot;, TestHandler)])</span><br><span class="line">    server = tornado.httpserver.HTTPServer(application)</span><br><span class="line">    server.bind(8886)</span><br><span class="line">    #specify number of subprocess</span><br><span class="line">    server.start(1)</span><br><span class="line">    </span><br><span class="line">    beat = ioloop.PeriodicCallback(dot, 100)</span><br><span class="line">    beat.start()</span><br><span class="line">    </span><br><span class="line">    try:</span><br><span class="line">        ioloop.IOLoop.instance().start()</span><br><span class="line">    except KeyboardInterrupt:</span><br><span class="line">        print(&apos; Interrupted&apos;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>运行程序并在浏览器进行请求，服务器会收到字符信息“get http request”，同时控制台显示结果如下。点点点为心跳信号，证明服务器在运行状态。观察到在接收到请求后等待几秒后才返回请求，同时这段时间内心跳信号消失，说明此时程序在处理耗时任务，不能响应其他请求连接。 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...................................get request</span><br><span class="line">5</span><br><span class="line">get http request</span><br><span class="line">...............................................................................</span><br></pre></td></tr></table></figure>
+<p>问题来了，不是说Tronado 是高性能的网络连接库吗，这里为什么不能响应其他连接呢？</p>
+<ol>
+<li>Tronado 采用 epoll 技术实现高并发网络连接，与通常采用多线程或多进程并发连接的技术方案不同，Tornado 默认是单进程单线程的。即demo 中 server、application 及handler 处在同一个进程及同一个主线程中。对于高并发技术方案可参考<a href="http://www.kegel.com/c10k.html" target="_blank" rel="noopener">《C10K问题》</a>。</li>
+<li>大家对网络连接的概念没有搞清楚，默认网络连接和请求响应任务处理是同一件事。高并发仅针对网络连接而言，与任务处理无关。当10台远端服务器同时请求我的http服务时，10个连接其实都已建立，但由于任务耗时较长，第一个连接的任务尚未处理完毕，其他9个连接的任务只能等待，造成程序阻塞。</li>
+<li>高并发（连接）与高性能其实并不等同，对于IO 密集型服务由于任务Cpu 耗时短，高并发与高性能可近似相等，但Cpu 密集型任务则不能单单考虑高并发，还需考虑具体任务的性能。</li>
+</ol>
+<h2 id="二-多进程、多线程及协程"><a href="#二-多进程、多线程及协程" class="headerlink" title="二.多进程、多线程及协程"></a>二.多进程、多线程及协程</h2><p>提升服务性能通常可以通过增强程序的并行处理能力来得到提高，常用的并行方案包括多进程、多线程及协程。多进程和多线程是操作系统提供及控制的，协程是应用程序自己控制的。下面对当前情景下的几种并行方案进行分析。</p>
+<h3 id="1-多进程"><a href="#1-多进程" class="headerlink" title="1.多进程"></a>1.多进程</h3><p>Tornado 多进程可通过构建多个Application实例实现，仅需对代码进行简单修改：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#开启2个进程</span><br><span class="line">server.start(2)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">............get request</span><br><span class="line">5</span><br><span class="line">..............................get request</span><br><span class="line">5</span><br><span class="line">.........................................get http request</span><br><span class="line">.............................get http request</span><br><span class="line">....................................................</span><br></pre></td></tr></table></figure>
+<p>可以看出服务器处理了两个请求连接后进行输出，实现了并行。</p>
+<p>Tornado 多进程的方式简单粗暴，但这种方案也有其缺点：</p>
+<p>*a.系统的进程资源很宝贵，最大进程数有限。</p>
+<p>*b.进程成本很高，多进程程序等于同一份程序复制n遍，耗费资源（内存、Cpu 上下文切换）较大。</p>
+<h3 id="2-多线程"><a href="#2-多线程" class="headerlink" title="2.多线程"></a>2.多线程</h3><p>多线程相比多进程占用系统资源少，但线程之间需要考虑同步及死锁等问题，同时大量线程cpu调度也是需要考虑的问题。</p>
+<p>对于当前应用场景，最大的问题其实是Python GIL（Global Interpreter Lock），这是一把全局解释器锁，再多的线程在解释器层面其实只相当于一个线程，所以Python 中通常不采用多线程的方案。</p>
+<h3 id="3-协程"><a href="#3-协程" class="headerlink" title="3.协程"></a>3.协程</h3><p>协程简单理解可以认为是用户态微线程。即用户自己控制（非操作系统调度）的微线程，并且多个微线程可以在单一线程下运行，没有线程切换的开销，执行效率极高。</p>
+<p>综上，采用协程对于实现请求异步非阻塞处理是最佳方案。下面是采用协程的代码修改部分：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from tornado import gen  </span><br><span class="line"></span><br><span class="line">class TestHandler(web.RequestHandler):</span><br><span class="line">    </span><br><span class="line">    @gen.coroutine</span><br><span class="line">    def get(self):</span><br><span class="line">        print(&quot;get request&quot;)</span><br><span class="line">        slow_responder(5)</span><br><span class="line">        res =  &quot;get http request&quot;</span><br><span class="line">        print(res)</span><br><span class="line">        self.write(res)</span><br></pre></td></tr></table></figure>
+<p>输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.............get request</span><br><span class="line">5</span><br><span class="line">..................get request</span><br><span class="line">5</span><br><span class="line">........................................get http request</span><br><span class="line">.........................................................................get http request</span><br></pre></td></tr></table></figure>
+<p>可以看出，协程方案实现了并行效果。现在是不是可以大功告成了呢，其实差矣，因为之前说过，Tornado 默认单进程单线程，即使请求处理改造成并行，但任务处理仍是单线程执行，整体程序性能仍较低。因此需要进一步改造。</p>
+<h2 id="三-多线程-多进程任务-任务队列分发"><a href="#三-多线程-多进程任务-任务队列分发" class="headerlink" title="三.多线程/多进程任务+任务队列分发"></a>三.多线程/多进程任务+任务队列分发</h2><p>现代服务器Cpu 核数可是很多的（至少8核），单进程单线程跑在一个Cpu 上岂不是浪费资源。因此最容易想到的就是将任务通过多线程最大化利用多核Cpu。多线程后面临的一个问题就是线程间消息的通信，如何将任务分发到线程及获取线程处理结果。这时就需要消息队列来进行通信和解耦。这里使用<a href="http://zeromq.org/" target="_blank" rel="noopener">zeroMQ</a> 作为消息队列。代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">import random</span><br><span class="line">import threading</span><br><span class="line">import time</span><br><span class="line">import os</span><br><span class="line"></span><br><span class="line">import zmq</span><br><span class="line">from zmq.eventloop.future import Context as FutureContext</span><br><span class="line">from zmq.devices.basedevice import ProcessDevice</span><br><span class="line"></span><br><span class="line">import tornado</span><br><span class="line">from tornado import gen</span><br><span class="line">from tornado import ioloop</span><br><span class="line">from tornado import web</span><br><span class="line">import tornado.httpserver</span><br><span class="line"></span><br><span class="line">def fast_worker(num):</span><br><span class="line">    &quot;&quot;&quot;thread for slowly responding to replies.&quot;&quot;&quot;</span><br><span class="line">    ctx = zmq.Context()</span><br><span class="line">    socket = ctx.socket(zmq.DEALER)</span><br><span class="line">    socket.connect(&apos;tcp://127.0.0.1:5556&apos;)</span><br><span class="line">    i = 0</span><br><span class="line">    while True:</span><br><span class="line">        frame, msg = socket.recv_multipart()</span><br><span class="line">        print(&quot;\nworker received %r\n&quot; % msg, end=&apos;&apos;)</span><br><span class="line">        print(num)</span><br><span class="line">        time.sleep(random.randint(1,5))</span><br><span class="line">        socket.send_multipart([frame, msg + b&quot; to you too, #%i&quot; % i])</span><br><span class="line">        i += 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def dot():</span><br><span class="line">    &quot;&quot;&quot;callback for showing that IOLoop is still responsive while we wait&quot;&quot;&quot;</span><br><span class="line">    sys.stdout.write(&apos;.&apos;)</span><br><span class="line">    sys.stdout.flush()</span><br><span class="line"></span><br><span class="line">class TestHandler(web.RequestHandler):</span><br><span class="line">    </span><br><span class="line">    @gen.coroutine</span><br><span class="line">    def get(self):</span><br><span class="line">        ctx = FutureContext.instance()</span><br><span class="line">        s = ctx.socket(zmq.DEALER)</span><br><span class="line"></span><br><span class="line">        s.connect(&apos;tcp://127.0.0.1:5555&apos;)</span><br><span class="line">        # send request to worker</span><br><span class="line">        yield s.send(b&apos;hello&apos;)</span><br><span class="line">        # finish web request with worker&apos;s reply</span><br><span class="line">        reply = yield s.recv()</span><br><span class="line">        print(&quot;\nfinishing with %r\n&quot; % reply)</span><br><span class="line">        s.close()</span><br><span class="line">        self.write(reply)</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line"></span><br><span class="line">    worker2 = threading.Thread(target=fast_worker,args=(2,))</span><br><span class="line">    worker2.daemon=True</span><br><span class="line">    worker2.start()</span><br><span class="line"></span><br><span class="line">    worker1 = threading.Thread(target=fast_worker,args=(1,))</span><br><span class="line">    worker1.daemon=True</span><br><span class="line">    worker1.start()</span><br><span class="line"></span><br><span class="line">    queuedevice = ProcessDevice(zmq.QUEUE, zmq.ROUTER, zmq.DEALER)</span><br><span class="line">    queuedevice.bind_in(&apos;tcp://127.0.0.1:5555&apos;)</span><br><span class="line">    queuedevice.bind_out(&apos;tcp://127.0.0.1:5556&apos;)</span><br><span class="line">    queuedevice.start()</span><br><span class="line"></span><br><span class="line">    application = web.Application([(r&quot;/&quot;, TestHandler)])</span><br><span class="line">    server = tornado.httpserver.HTTPServer(application)</span><br><span class="line">    server.bind(8886)</span><br><span class="line">    #specify number of subprocess</span><br><span class="line">    server.start(1)</span><br><span class="line">    beat = ioloop.PeriodicCallback(dot, 100)</span><br><span class="line">    beat.start()</span><br><span class="line">    try:</span><br><span class="line">        ioloop.IOLoop.instance().start()</span><br><span class="line">    except KeyboardInterrupt:</span><br><span class="line">        print(&apos; Interrupted&apos;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.........................</span><br><span class="line">worker received b&apos;hello&apos;</span><br><span class="line">1</span><br><span class="line">...</span><br><span class="line">worker received b&apos;hello&apos;</span><br><span class="line">2</span><br><span class="line">...............................</span><br><span class="line">finishing with b&apos;hello to you too, #0&apos;</span><br><span class="line"></span><br><span class="line">...............</span><br><span class="line">finishing with b&apos;hello to you too, #0&apos;</span><br></pre></td></tr></table></figure>
+<p>通过多线程+消息队列我们实现了任务并行，可充分榨干多核Cpu 性能，提升Cpu 密集型服务的处理能力。</p>
+<h2 id="四-总结"><a href="#四-总结" class="headerlink" title="四.总结"></a>四.总结</h2><p>这种方案性能的提升留给大家自己去实践和测试。对于Cpu 密集型应用，如何最大化提升性能仍任重而道远。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/工程/" rel="tag"># 工程</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/LNMP-Docker环境搭建-PHP-开发系列-1/" rel="next" title="LNMP Docker环境搭建 -- PHP 开发系列(1)">
+                <i class="fa fa-chevron-left"></i> LNMP Docker环境搭建 -- PHP 开发系列(1)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Fedor">
+          <p class="site-author-name" itemprop="name">Fedor</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一-简易Tornado服务"><span class="nav-number">1.</span> <span class="nav-text">一. 简易Tornado服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-多进程、多线程及协程"><span class="nav-number">2.</span> <span class="nav-text">二.多进程、多线程及协程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-多进程"><span class="nav-number">2.1.</span> <span class="nav-text">1.多进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-多线程"><span class="nav-number">2.2.</span> <span class="nav-text">2.多线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-协程"><span class="nav-number">2.3.</span> <span class="nav-text">3.协程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三-多线程-多进程任务-任务队列分发"><span class="nav-number">3.</span> <span class="nav-text">三.多线程/多进程任务+任务队列分发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四-总结"><span class="nav-number">4.</span> <span class="nav-text">四.总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fedor</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
