@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://fedoryx.github.io/"/>
-  <updated>2019-05-24T11:41:41.000Z</updated>
+  <updated>2019-06-02T14:21:39.000Z</updated>
   <id>https://fedoryx.github.io/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>白板逻辑回归</title>
+    <link href="https://fedoryx.github.io/%E7%99%BD%E6%9D%BF%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92/"/>
+    <id>https://fedoryx.github.io/白板逻辑回归/</id>
+    <published>2019-06-02T02:46:44.000Z</published>
+    <updated>2019-06-02T14:21:39.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>白板逻辑回归，记录下思路。</p><a id="more"></a><h2 id="一-概括"><a href="#一-概括" class="headerlink" title="一. 概括"></a>一. 概括</h2><ul><li>解决问题：二分类</li><li><p>基本假设：</p><ul><li><p>因变量y服从二元分布（伯努利分布）</p></li><li><p>样本集独立同分布（训练集、验证集）</p></li></ul></li><li>模型参数估计：极大似然法</li><li>损失函数：对数似然损失</li><li>计算：梯度下降</li><li>生成式 or 判别式：判别式</li></ul><h2 id="二-推导"><a href="#二-推导" class="headerlink" title="二. 推导"></a>二. 推导</h2><p>1.线性回归拟合对数几率<br>$ ln(\frac{y}{1-y}) = w^Tx + b $<br>$ y = \frac{1}{1+e^{-(w^Tx+b)}} $</p><p>2.最大似然<br>最大化似然<br>$   L(\theta) = \prod_{i=1}^{m}y^{yi}*(1-y)^{1-yi} $<br>最小化似然损失<br>$  l(\theta) = -\frac{1}{m} \sum_{i=1}^{m}{[y_i\log(y) + (1-y_i)\log(1 - y)]} $</p><p>3.损失函数<br>$ Cost(h_\theta(x,y)) = - \log(h_\theta(x))   if   y = 1 $<br>$ Cost(h_\theta(x,y)) = - \log(1 - h_\theta(x))   if   y = 0 $</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;白板逻辑回归，记录下思路。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="机器学习" scheme="https://fedoryx.github.io/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+      <category term="机器学习" scheme="https://fedoryx.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
   
   <entry>
     <title>tornado pyzmq 高性能cpu密集型服务搭建</title>
@@ -175,7 +197,7 @@
     <link href="https://fedoryx.github.io/hello-world/"/>
     <id>https://fedoryx.github.io/hello-world/</id>
     <published>2017-05-16T11:11:11.000Z</published>
-    <updated>2019-04-21T03:08:59.000Z</updated>
+    <updated>2019-06-02T12:39:23.000Z</updated>
     
     <content type="html"><![CDATA[<p>Hello World！ 新的故事从这里开始！ </p><a id="more"></a><h2 id="新的故事"><a href="#新的故事" class="headerlink" title="新的故事"></a>新的故事</h2><p>希望这里有满满的回忆，少年！</p><p>continue</p>]]></content>
     
