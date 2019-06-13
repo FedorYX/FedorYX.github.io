@@ -1,0 +1,797 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="hadoop streaming,AWK,大数据">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Fedor 的小花园与大世界" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1">
+
+
+
+
+
+
+<meta name="description" content="Hadoop Streaming 使用了 Unix 的标准输入输出作为 Hadoop 和其他编程语言的开发接口，因此可以使用Hadoop Streaming 结合AWK 处理文本大数据。 本篇主要结合实际应用中的一个任务需求进行介绍。">
+<meta name="keywords" content="hadoop streaming,AWK,大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hadoop sreaming + AWK 大数据处理">
+<meta property="og:url" content="https://fedoryx.github.io/hadoop-sreaming-AWK-大数据处理/index.html">
+<meta property="og:site_name" content="Fedor 的小花园与大世界">
+<meta property="og:description" content="Hadoop Streaming 使用了 Unix 的标准输入输出作为 Hadoop 和其他编程语言的开发接口，因此可以使用Hadoop Streaming 结合AWK 处理文本大数据。 本篇主要结合实际应用中的一个任务需求进行介绍。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-06-13T03:47:50.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="hadoop sreaming + AWK 大数据处理">
+<meta name="twitter:description" content="Hadoop Streaming 使用了 Unix 的标准输入输出作为 Hadoop 和其他编程语言的开发接口，因此可以使用Hadoop Streaming 结合AWK 处理文本大数据。 本篇主要结合实际应用中的一个任务需求进行介绍。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://fedoryx.github.io/hadoop-sreaming-AWK-大数据处理/">
+
+
+
+
+
+  <title>hadoop sreaming + AWK 大数据处理 | Fedor 的小花园与大世界</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Fedor 的小花园与大世界</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://fedoryx.github.io/hadoop-sreaming-AWK-大数据处理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fedor">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fedor 的小花园与大世界">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">hadoop sreaming + AWK 大数据处理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-12T09:13:13+00:00">
+                2019-06-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/大数据/" itemprop="url" rel="index">
+                    <span itemprop="name">大数据</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Hadoop Streaming 使用了 Unix 的标准输入输出作为 Hadoop 和其他编程语言的开发接口，因此可以使用Hadoop Streaming 结合AWK 处理文本大数据。 本篇主要结合实际应用中的一个任务需求进行介绍。</p>
+<a id="more"></a>
+<h2 id="0-任务"><a href="#0-任务" class="headerlink" title="0.任务"></a>0.任务</h2><p>一份大数据文档以TAB 为分隔符，文档格式为:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A <span class="string">"\t"</span> B <span class="string">"\t"</span> C <span class="string">"\t"</span> D</span><br></pre></td></tr></table></figure>
+<p>mapper中利用AWK对文档进行处理，输出Key = A”\t”B，Value = C”\t”D。</p>
+<p>reducer接收输入按Key=A”\t”B分桶并排序，进行运算合并Key对应Value。</p>
+<p>最终输出文档 Key=A”\t”B 唯一。</p>
+<p>举例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mapper num = 2，reducer num = 2,mapper、reducer运算皆为对应字段简单相加</span><br><span class="line">输入：</span><br><span class="line">a1 \t b1 \t c1 \t d1</span><br><span class="line">a1 \t b1 \t c2 \t d2</span><br><span class="line">a2 \t b2 \t c3 \t d3</span><br><span class="line">a2 \t b2 \t c4 \t d4</span><br><span class="line">a2 \t b2 \t c5 \t d5</span><br><span class="line">a1 \t b1 \t c6 \t d6</span><br><span class="line"></span><br><span class="line">mapper 输出：</span><br><span class="line">a1 \t b1 \t c1+c2 \t d1+d2</span><br><span class="line">a2 \t b2 \t c3 \t d3</span><br><span class="line"></span><br><span class="line">a2 \t b2 \t c4+c5 \t d4+d5</span><br><span class="line">a1 \t b1 \t c6 \t d6</span><br><span class="line"></span><br><span class="line">reducer 输入：</span><br><span class="line">a1 \t b1 \t c1+c2 \t d1+d2</span><br><span class="line">a1 \t b1 \t c6 \t d6</span><br><span class="line"></span><br><span class="line">a2 \t b2 \t c4+c5 \t d4+d5</span><br><span class="line">a2 \t b2 \t c3 \t d3</span><br><span class="line"></span><br><span class="line">reducer 输出：</span><br><span class="line">a1 \t b1 \t c1+c2+c6 \t d1+d2+d6</span><br><span class="line"></span><br><span class="line">a2 \t b2 \t c4+c5+c3 \t d4+d5+d3</span><br></pre></td></tr></table></figure>
+<h2 id="一-Hadoop-Streaming-概要"><a href="#一-Hadoop-Streaming-概要" class="headerlink" title="一.Hadoop Streaming 概要"></a>一.Hadoop Streaming 概要</h2><p>Hadoop Streaming 使用了 Unix 的标准输入输出作为 Hadoop 和其他编程语言的开发接口，map/reduce 程序只要遵循从标准输入stdin 读，写出到标准输出stdout 即可。</p>
+<p>同时本地调试可通过linux指令进行，指令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat inputfile | mapper | sort | reducer &gt; output</span></span><br></pre></td></tr></table></figure>
+<p>mapper、reducer 为对应的map/reduce 程序。</p>
+<p>当然，本地调试与hadoop实际运行仍有差异，主要差异在sort的理解和应用。下面重点介绍sort相关知识。</p>
+<h2 id="二-分桶与排序"><a href="#二-分桶与排序" class="headerlink" title="二.分桶与排序"></a>二.分桶与排序</h2><h3 id="1-Key-和-Value"><a href="#1-Key-和-Value" class="headerlink" title="1.Key 和 Value"></a>1.Key 和 Value</h3><p>经过mapper后hadoop输出数据以Key、Value格式组织，Key、Value默认分隔符为第一个TAB。之后会根据Key 对数据进行分桶。</p>
+<h3 id="2-mapper"><a href="#2-mapper" class="headerlink" title="2.mapper"></a>2.mapper</h3><p>如果想自定义mapper 输出，则可进行如下设置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#-D stream.map.output.field.separator=.    # 指定mapper每条输出key,value分隔符</span></span><br><span class="line">-D stream.num.map.output.key.fields=2   <span class="comment"># 第2个.之前的为key, 剩下的为value</span></span><br><span class="line"><span class="comment">#-D  map.output.key.field.separator=.    # 设置map输出中，Key内部的分隔符</span></span><br></pre></td></tr></table></figure>
+<p>由于默认以TAB作分隔符，本例中设置分隔符的操作可以省略，仅设置输出Key列数。</p>
+<h3 id="3-Partition"><a href="#3-Partition" class="headerlink" title="3.Partition"></a>3.Partition</h3><p>Partition是分桶过程，如reduce num 设置为N，则Partition会依据Key将map后的数据按规则分配为N组，默认规则是按Key 的hash 值。</p>
+<p>官网看到的Partition类型有如下几种：</p>
+<ul>
+<li><a href="https://hadoop.apache.org/docs/r1.2.1/api/org/apache/hadoop/mapred/lib/BinaryPartitioner.html" target="_blank" rel="noopener">BinaryPartitioner</a></li>
+<li><a href="https://hadoop.apache.org/docs/r1.2.1/api/org/apache/hadoop/mapred/lib/HashPartitioner.html" target="_blank" rel="noopener">HashPartitioner</a></li>
+<li><a href="https://hadoop.apache.org/docs/r1.2.1/api/org/apache/hadoop/contrib/index/mapred/IndexUpdatePartitioner.html" target="_blank" rel="noopener">IndexUpdatePartitioner</a></li>
+<li><a href="https://hadoop.apache.org/docs/r1.2.1/api/org/apache/hadoop/mapred/lib/KeyFieldBasedPartitioner.html" target="_blank" rel="noopener">KeyFieldBasedPartitioner</a></li>
+<li><a href="https://hadoop.apache.org/docs/r1.2.1/api/org/apache/hadoop/examples/SleepJob.html" target="_blank" rel="noopener">SleepJob</a></li>
+<li><a href="https://hadoop.apache.org/docs/r1.2.1/api/org/apache/hadoop/mapred/lib/TotalOrderPartitioner.html" target="_blank" rel="noopener">TotalOrderPartitioner</a></li>
+</ul>
+<p>KeyFieldBasedPartitioner 可以按Key分隔的Field进行分桶，分桶规则依然是Hash。</p>
+<p>TotalOrderPartitioner可以全局排序。</p>
+<p>本例中需要使用KeyFieldBasedPartitioner，其他类可自行了解。</p>
+<p>Partition过程可进行如下设置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">A 指定key列数</span><br><span class="line"><span class="comment">#-D num.key.fields.for.partition=1        # 第1列key</span></span><br><span class="line">-D num.key.fields.for.partition=2       <span class="comment"># 前两列key</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#B 指定某些字段做key</span></span><br><span class="line"><span class="comment">#-D mapred.text.key.partitioner.option =-k1,2   # Key第1,2列</span></span><br><span class="line"><span class="comment">#-D mapred.text.key.partitioner.option =-k2,2   # key第2列</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#同时需要修改使用的partition 类</span></span><br><span class="line"></span><br><span class="line">-partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner</span><br></pre></td></tr></table></figure>
+<h3 id="4-Comparator"><a href="#4-Comparator" class="headerlink" title="4.Comparator"></a>4.Comparator</h3><p>如上设置后已可以完成开头提出的任务。但存在一个问题，由于是按 A”\t”B Hash分桶，对于A、B字段按字典序排列将被分配至不同reducer，如:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"a"</span> \t <span class="string">"b"</span> \t <span class="string">"c"</span> \t <span class="string">"d"</span></span><br><span class="line"><span class="string">"a"</span> \t <span class="string">"b1"</span> \t <span class="string">"c1"</span> \t <span class="string">"d1"</span></span><br><span class="line"><span class="string">"a"</span> \t <span class="string">"b"</span>，<span class="string">"a"</span> \t <span class="string">"b1"</span> Hash值会不同，可能分配至不同桶</span><br></pre></td></tr></table></figure>
+<p>如果想保留Key的字典序，一个思路是按Key=”A”分桶，在reduce输入排序阶段按Key=A”\t”B排序。这就会使用到Comparator，进行如下设置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator</span><br><span class="line">-D mapred.text.key.comparator.options=-k1,2</span><br><span class="line"><span class="comment">#同时修改partion 使用的key</span></span><br><span class="line">-D num.key.fields.for.partition=1        <span class="comment"># 第1列key</span></span><br></pre></td></tr></table></figure>
+<p>最终得到预期输出。</p>
+<h2 id="四-参考资料"><a href="#四-参考资料" class="headerlink" title="四.参考资料"></a>四.参考资料</h2><p>1.<a href="https://hadoop.apache.org/docs/r1.2.1/streaming.html#Hadoop+Field+Selection+Class" target="_blank" rel="noopener">Hadoop Streaming 官网</a><br>2.<a href="https://www.cnblogs.com/shay-zhangjin/p/7714868.html" target="_blank" rel="noopener">Hadoop Streaming详解</a><br>3.<a href="http://cucmakeit.github.io/2014/11/13/MapReduce%E6%8E%92%E5%BA%8F%E8%BF%87%E7%A8%8B%E8%AF%A6%E8%A7%A3/" target="_blank" rel="noopener">MapReduce排序过程详解</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/白板GBDT/" rel="next" title="白板GBDT">
+                <i class="fa fa-chevron-left"></i> 白板GBDT
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Fedor">
+          <p class="site-author-name" itemprop="name">Fedor</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-任务"><span class="nav-number">1.</span> <span class="nav-text">0.任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一-Hadoop-Streaming-概要"><span class="nav-number">2.</span> <span class="nav-text">一.Hadoop Streaming 概要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-分桶与排序"><span class="nav-number">3.</span> <span class="nav-text">二.分桶与排序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Key-和-Value"><span class="nav-number">3.1.</span> <span class="nav-text">1.Key 和 Value</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-mapper"><span class="nav-number">3.2.</span> <span class="nav-text">2.mapper</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Partition"><span class="nav-number">3.3.</span> <span class="nav-text">3.Partition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Comparator"><span class="nav-number">3.4.</span> <span class="nav-text">4.Comparator</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四-参考资料"><span class="nav-number">4.</span> <span class="nav-text">四.参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fedor</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" rel="external nofollow">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" rel="external nofollow">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
